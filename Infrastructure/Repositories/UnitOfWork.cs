@@ -8,27 +8,18 @@ namespace Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     
-    private readonly Dictionary<Type , object> _repositories = [];
+    
     private readonly AppDbContext _dbContext;
+    public IProjectRepository ProjectRepository { get; }
 
-    public UnitOfWork(AppDbContext dbContext)
+    public UnitOfWork(AppDbContext dbContext , IProjectRepository projectRepository)
     {
         _dbContext = dbContext;
+        ProjectRepository = projectRepository;
     }
-
-    public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
+    
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var repotype = typeof(TEntity);
-        if(_repositories.TryGetValue(repotype, out var repo))
-            return (IGenericRepository<TEntity, TKey>)repo; // casting
-        
-        var newRepo = new GenericRepository<TEntity, TKey>(_dbContext);
-        _repositories.Add(repotype, newRepo);
-        return newRepo;
-    }
-
-    public Task<int> SaveChangesAsync()
-    {
-        return _dbContext.SaveChangesAsync();
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

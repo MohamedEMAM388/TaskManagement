@@ -6,8 +6,8 @@ namespace Application.Interfaces;
 public interface IUnitOfWork
 {
 
-    public IGenericRepository<TEntity, TKey> GetRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>;
-    public Task<int> SaveChangesAsync();
+    public IProjectRepository ProjectRepository { get; }
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
 
 }
