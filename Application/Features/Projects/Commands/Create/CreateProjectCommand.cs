@@ -7,4 +7,5 @@ public sealed record CreateProjectCommand (
     string Name,
     string Description,
     ProjectStatus Status
+    
     ) : IRequest<bool>;

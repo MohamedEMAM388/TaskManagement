@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Negotiate;
 
 namespace API;
 
-public class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
