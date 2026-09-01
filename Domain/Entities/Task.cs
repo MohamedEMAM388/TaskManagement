@@ -6,7 +6,7 @@ public class Task : BaseEntity<int>
 
     public string Description { get; set; } = string.Empty;
 
-    public bool IsCompleted { get; set; }
+    public bool IsCompleted { get; set; } = false;
 
     public DateTime DueDate { get; set; }
 

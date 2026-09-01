@@ -1,15 +1,16 @@
-using Domain.Entities;
-using AsyncTask = System.Threading.Tasks.Task;
+using Project = Domain.Entities.Project;
+using System.Threading.Tasks;
 
 namespace Application.Interfaces;
 
 public interface IProjectRepository
 {
-    
-    // create project take Command => return bool
-    public AsyncTask CreateAsync(Project project, CancellationToken cancellationToken);
+    // Create project
+    public Task CreateAsync(Project project, CancellationToken cancellationToken);
 
-    // get projects take query => return list of projectsDTO
-    public Task<IEnumerable<Project>>  GetAllAsync(CancellationToken cancellationToken);
-    
+    // Get all projects
+    public Task<IEnumerable<Project>> GetAllAsync(CancellationToken cancellationToken);
+
+    // Check if project with the same name exists
+    public Task<bool> HasNameAsync(string name);
 }

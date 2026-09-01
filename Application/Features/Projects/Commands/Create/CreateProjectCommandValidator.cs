@@ -13,10 +13,7 @@ public class CreateProjectCommandValidator : AbstractValidator<CreateProjectComm
         RuleFor(y => y.Description)
             .NotEmpty()
             .WithMessage("Description is required");
-        
-        RuleFor(y => y.Status)
-            .IsInEnum()
-            .WithMessage("Invalid project status");
+
     }
 
 }

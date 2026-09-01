@@ -2,8 +2,10 @@ namespace Domain.Entities.Enums;
 
 public enum ProjectStatus
 {
-    Planning = 1,
+    Pending,
+    Planning,
     InProgress,
     Completed,
-    Cancelled
+    Cancelled , 
+    Archived
 }

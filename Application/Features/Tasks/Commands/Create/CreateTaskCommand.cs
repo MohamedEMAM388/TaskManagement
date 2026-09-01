@@ -1,6 +1,9 @@
+using MediatR;
+
 namespace Application.Features.Tasks.Commands.Create;
 
-public class CreateTaskCommand
-{
-    
-}
+public sealed record CreateTaskCommand
+(
+    string Title,
+    string Description,
+    DateTime DueDate) : IRequest<int>;

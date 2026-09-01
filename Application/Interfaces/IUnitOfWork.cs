@@ -7,6 +7,7 @@ public interface IUnitOfWork
 {
 
     public IProjectRepository ProjectRepository { get; }
+    public ITaskRepository TaskRepository { get; }
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
 

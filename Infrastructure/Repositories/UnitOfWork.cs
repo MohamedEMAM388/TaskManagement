@@ -11,10 +11,13 @@ public class UnitOfWork : IUnitOfWork
     
     private readonly AppDbContext _dbContext;
     public IProjectRepository ProjectRepository { get; }
+    public ITaskRepository TaskRepository { get; }
 
-    public UnitOfWork(AppDbContext dbContext , IProjectRepository projectRepository)
+    public UnitOfWork(AppDbContext dbContext , IProjectRepository projectRepository ,
+        ITaskRepository taskRepository)
     {
         _dbContext = dbContext;
+        TaskRepository = taskRepository;
         ProjectRepository = projectRepository;
     }
     

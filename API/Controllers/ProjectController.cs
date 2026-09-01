@@ -1,7 +1,6 @@
 using Application.Features.Projects.Commands.Create;
 using Application.Features.Projects.Queries.GetProjects;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -11,14 +10,14 @@ namespace API.Controllers
     public class ProjectController(ISender sender) : ControllerBase
     {
         // get all projects
-        [HttpGet]
+        [HttpGet("GetProjects")]
         public async Task<IActionResult> GetAll()
         {
             var result = await sender.Send(new GetProjectsQuery());
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost("CreateProject")]
         public async Task<IActionResult> Create(CreateProjectCommand request)
         {
             var result = await sender.Send(request);

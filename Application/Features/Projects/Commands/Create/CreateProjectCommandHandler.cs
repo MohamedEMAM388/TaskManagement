@@ -1,31 +1,33 @@
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Entities.Enums;
 using MediatR;
 
 namespace Application.Features.Projects.Commands.Create;
 
-public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand , bool>
+public class CreateProjectCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<CreateProjectCommand , int>
 {
-    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateProjectCommandHandler(IUnitOfWork unitOfWork)
+
+    public async Task<int> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        _unitOfWork = unitOfWork;
-    }
-
-    public async Task<bool> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
-    {
-
+                                   // Business Rules //
+        // 1 => project has a unique name 
+        var exists = await unitOfWork.ProjectRepository.HasNameAsync(request.Name);
+        if (exists)
+              throw new InvalidOperationException
+                  ($"Project With Name {request.Name} already exists");
+        
+        // 2 => start from pending state
         var project = new Project()
         {
             Name = request.Name,
             Description = request.Description,
-            Status = request.Status
+            Status = ProjectStatus.Pending
         };
         
-        await _unitOfWork.ProjectRepository.CreateAsync(project , cancellationToken);
-        return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
- 
-
+         await unitOfWork.ProjectRepository.CreateAsync(project , cancellationToken);
+         await unitOfWork.SaveChangesAsync(cancellationToken) ;
+         return project.Id;
     }
 }
