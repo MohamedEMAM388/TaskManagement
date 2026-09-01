@@ -23,7 +23,8 @@ public static class DependencyInjection
             typeof(IPipelineBehavior<,>),
             typeof(ValidationBehavior<,>));
 
-        services.AddAutoMapper(typeof(DependencyInjection).Assembly);
+        services.AddAutoMapper(cfg => { },
+                 typeof(DependencyInjection).Assembly);
         return services;
     }
 }

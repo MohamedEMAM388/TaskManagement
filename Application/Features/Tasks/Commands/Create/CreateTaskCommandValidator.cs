@@ -27,6 +27,7 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 
         RuleFor(t => t.ProjectId)
             .NotEmpty()
+            .GreaterThan(0)
             .WithMessage("Project is required");
 
 

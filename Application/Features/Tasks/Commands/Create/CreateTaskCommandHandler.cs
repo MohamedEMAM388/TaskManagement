@@ -9,7 +9,8 @@ namespace Application.Features.Tasks.Commands.Create;
 public class CreateTaskCommandHandler(IUnitOfWork unitOfWork) :
                                      IRequestHandler<CreateTaskCommand , int>
 {
-    public async Task<int> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateTaskCommand request,
+                                  CancellationToken cancellationToken)
     {
                                            // Business Rules //
         // 1 => project of request.projectId must be available 
@@ -17,7 +18,8 @@ public class CreateTaskCommandHandler(IUnitOfWork unitOfWork) :
                                      .GetByIdAsync(request.ProjectId, cancellationToken);
 
          if (project is null)
-                 throw new KeyNotFoundException($"Project with id {request.ProjectId} does not exist");
+                 throw new KeyNotFoundException(
+                           $"Project with id {request.ProjectId} does not exist");
          
          // 2 => if project is completed and archived can not add task
          if (project.Status is ProjectStatus.Completed or ProjectStatus.Archived)
