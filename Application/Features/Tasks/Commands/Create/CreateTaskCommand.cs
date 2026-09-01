@@ -6,4 +6,5 @@ public sealed record CreateTaskCommand
 (
     string Title,
     string Description,
+    int ProjectId,
     DateTime DueDate) : IRequest<int>;

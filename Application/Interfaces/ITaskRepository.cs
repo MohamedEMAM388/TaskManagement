@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using DomainTask = Domain.Entities.Task;
 
 namespace Application.Interfaces;
@@ -12,5 +11,7 @@ public interface ITaskRepository
     public Task UpdateTaskAsync(DomainTask task);
 
     // delete
-    public Task DeleteTaskAsync(DomainTask task);
+    public Task DeleteTaskAsync(DomainTask task); 
+    
+
 }

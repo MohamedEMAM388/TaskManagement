@@ -13,4 +13,7 @@ public interface IProjectRepository
 
     // Check if project with the same name exists
     public Task<bool> HasNameAsync(string name);
+    
+    // get by id 
+    Task<Project?> GetByIdAsync(int id, CancellationToken cancellationToken);
 }

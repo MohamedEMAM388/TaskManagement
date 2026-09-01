@@ -28,4 +28,11 @@ public class ProjectRepository(AppDbContext context) : IProjectRepository
         return await context.Projects
                     .AnyAsync(x => x.Name == name);
     }
+
+    public async Task<Project?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return await context.Projects.FirstOrDefaultAsync(
+                             x => x.Id == id, cancellationToken);
+
+    }
 }

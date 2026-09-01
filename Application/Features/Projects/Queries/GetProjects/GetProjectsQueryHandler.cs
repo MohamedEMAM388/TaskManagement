@@ -13,9 +13,6 @@ public class GetProjectsQueryHandler(IUnitOfWork unitOfWork , IMapper mapper) :
     {
         // get projects 
         var projects = await unitOfWork.ProjectRepository.GetAllAsync(cancellationToken);
-        if (!projects.Any())
-            return [];
         return mapper.Map<IEnumerable<ProjectDto>>(projects);
-
     }
 }

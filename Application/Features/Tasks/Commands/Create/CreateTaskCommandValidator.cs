@@ -25,6 +25,9 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
             .GreaterThanOrEqualTo(DateTime.Today)
             .WithMessage("DueDate cannot exceed today's date");
 
+        RuleFor(t => t.ProjectId)
+            .NotEmpty()
+            .WithMessage("Project is required");
 
 
     }
