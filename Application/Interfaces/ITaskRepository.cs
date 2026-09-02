@@ -13,5 +13,8 @@ public interface ITaskRepository
     // delete
     public Task DeleteTaskAsync(DomainTask task); 
     
+    // get by id 
+    public Task<DomainTask?> GetTaskByIdAsync(int taskId, CancellationToken cancellationToken);
+    
 
 }

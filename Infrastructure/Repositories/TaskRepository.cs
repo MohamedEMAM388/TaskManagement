@@ -29,5 +29,8 @@ public class TaskRepository(AppDbContext context) : ITaskRepository
         return AsyncTask.CompletedTask;
     }
 
-
+    public async Task<DomainTask?> GetTaskByIdAsync(int taskId, CancellationToken cancellationToken)
+    {
+        return await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId, cancellationToken);
+    }
 }

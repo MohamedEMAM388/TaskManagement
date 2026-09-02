@@ -1,6 +1,5 @@
+using MediatR;
+
 namespace Application.Features.Tasks.Commands.Delete;
 
-public class DeleteTaskCommand
-{
-    
-}
+public sealed record DeleteTaskCommand(int Id) : IRequest<bool>; 
