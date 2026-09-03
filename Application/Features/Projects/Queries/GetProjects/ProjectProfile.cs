@@ -12,7 +12,7 @@ public class ProjectProfile : Profile
         CreateMap<Project, ProjectDto>()
             .ForMember( p => p.StartAt , 
                 dst =>
-                    dst.MapFrom(opt => opt.CreateAt));
+                    dst.MapFrom(opt => opt.CreatedAt));
       
         
     }
