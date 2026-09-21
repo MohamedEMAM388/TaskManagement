@@ -1,0 +1,16 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# JetBrains Rider
+.idea/
+
+# User-specific settings
+*.user
+*.DotSettings.user
+
+# ASP.NET
+appsettings.Development.json
