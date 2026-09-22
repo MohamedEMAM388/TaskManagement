@@ -34,6 +34,8 @@ public static class DependencyInjection
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.Configure<JwtSettings>(configuration.GetSection("JWT"));
 
         return services;
     }

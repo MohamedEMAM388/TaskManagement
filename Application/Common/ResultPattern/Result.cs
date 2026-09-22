@@ -53,8 +53,8 @@ public class Result<TValue> : Result
     public static Result<TValue> Ok(TValue value) => new Result<TValue>(value);
     
     // fail with one error
-    public static Result<TValue> Fail(Error error) => new Result<TValue>(error);
+    public new static Result<TValue> Fail(Error error) => new Result<TValue>(error);
     
     // fail with multi error
-    public static Result<TValue> Fail(IReadOnlyList<Error> errors) => new Result<TValue>(errors);
+    public new static Result<TValue> Fail(IReadOnlyList<Error> errors) => new Result<TValue>(errors);
 }

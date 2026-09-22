@@ -5,14 +5,14 @@ using MediatR;
 
 namespace Application.Features.Authentication.Commands.Login;
 
-public class LoginCommandHandler(IIdentityService identityService) : IRequestHandler<LoginCommand, Result<UserDto>>
+public class LoginCommandHandler(IIdentityService identityService ,
+    ITokenService  tokenService) : IRequestHandler<LoginCommand, Result<UserDto>>
 {
     public async Task<Result<UserDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         // get user by email
         var userResult = await identityService.GetUserByEmailAsync(request.LoginDto.Email);
         if (!userResult.IsSuccess)
-            // don't reveal whether the email exists: same error as a wrong password
             return Result<UserDto>.Fail(Error.InvalidCredentials());
 
         // check user password
@@ -21,11 +21,21 @@ public class LoginCommandHandler(IIdentityService identityService) : IRequestHan
             return Result<UserDto>.Fail(passwordResult.Errors);
 
         var user = userResult.Value;
+        var resultRoles = await identityService.GetRolesAsync(user.Email , cancellationToken);
+        var roles = resultRoles.Value;
+        
+        // refresh token
+        var refreshTokenResult  = tokenService.GenerateRefreshToken();
+        await identityService.SaveRefreshTokenAsync(user.Id, refreshTokenResult , cancellationToken);
+        
         return Result<UserDto>.Ok(new UserDto
         {
             Email = user.Email,
             DisplayName = user.DisplayName,
-            Token = "Token"
+            Token = tokenService.CreateToken(user.Id , user.Email , user.UserName , roles),
+            RefreshToken = refreshTokenResult.Token,
+            RefreshTokenExpiration = refreshTokenResult.ExpiresOn
+            
         });
     }
 }

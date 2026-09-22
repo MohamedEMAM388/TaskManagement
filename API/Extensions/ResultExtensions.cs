@@ -6,10 +6,6 @@ namespace API.Extensions;
 
 public static class ResultExtensions
 {
-    /// <summary>
-    /// Converts a failed <see cref="Result"/> into an HTTP response.
-    /// The status code comes from the first error's <see cref="ErrorType"/>.
-    /// </summary>
     public static ObjectResult ToProblem(this Result result)
     {
         if (result.IsSuccess)

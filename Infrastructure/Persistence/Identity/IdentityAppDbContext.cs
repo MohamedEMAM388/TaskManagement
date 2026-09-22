@@ -2,6 +2,7 @@ using Infrastructure.Persistence.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Persistence.Configurations;
 
 namespace Infrastructure.Persistence.Identity;
 
@@ -26,7 +27,10 @@ public class IdentityAppDbContext : IdentityDbContext<ApplicationUser>
             .ToTable("Roles");
         builder.Entity<IdentityUserRole<string>>()
             .ToTable("UserRoles");
+        builder.ApplyConfiguration(new RefreshTokenConfiguration());
     }
+    
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     
     
