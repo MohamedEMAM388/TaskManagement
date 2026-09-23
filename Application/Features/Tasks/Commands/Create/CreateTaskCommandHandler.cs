@@ -16,7 +16,12 @@ public class CreateTaskCommandHandler(IUnitOfWork unitOfWork ,
         // result here covers both "doesn't exist" and "was deleted".
         var project = await unitOfWork.ProjectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
         if (project is null)
-            return Result<int>.Fail(ProjectErrors.NotFound(request.ProjectId));
+            return Result<int>.Fail(Error.NotFound("Project.NotFound",
+                $"Project with id '{request.ProjectId}' was not found."));
+
+        if (!project.CanAcceptTasks)
+            return Result<int>.Fail(Error.Conflict("Project.NotAcceptingTasks",
+                $"Cannot add tasks to a project with status '{project.Status}'."));
 
         // get user 
         var userId = userService.UserId;

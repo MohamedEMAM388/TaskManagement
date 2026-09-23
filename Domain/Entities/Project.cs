@@ -14,4 +14,18 @@ public class Project : BaseEntity<int>
     
     // Connect users to Projects 
     public string CreatedByUserId { get; set; } = string.Empty;
+    
+    ////////////////
+    public void SoftDelete(DateTime deletedAt)
+    {
+        foreach (var task in Tasks)
+           task.MarkAsDeleted(deletedAt);
+        
+        MarkAsDeleted(deletedAt);
+        
+    }
+    
+    // A cancelled or archived project can't receive new tasks
+    public bool CanAcceptTasks =>
+        Status is not (ProjectStatus.Cancelled or ProjectStatus.Archived);
 }

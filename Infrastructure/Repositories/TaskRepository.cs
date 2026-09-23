@@ -22,15 +22,7 @@ public class TaskRepository(AppDbContext context) : ITaskRepository
         return AsyncTask.CompletedTask;
     }
 
-    public AsyncTask DeleteTaskAsync(DomainTask task)
-    {
-        task.IsDeleted = true;
-        task.DeletedAt = DateTime.UtcNow;
 
-        context.Update(task);
-
-        return AsyncTask.CompletedTask;
-    }
 
     public async Task<DomainTask?> GetTaskByIdAsync(int taskId, CancellationToken cancellationToken)
     {
@@ -40,5 +32,17 @@ public class TaskRepository(AppDbContext context) : ITaskRepository
     public async Task<IEnumerable<DomainTask>> GetAllAsync(CancellationToken cancellationToken)
     {
         return await context.Tasks.ToListAsync(cancellationToken);
+    }
+
+    public async Task<DomainTask?> GetTaskByIdWithCommentsAsync(int taskId, CancellationToken cancellationToken)
+    {
+        return await context.Tasks.Include(x => x.Comments)
+            .FirstOrDefaultAsync(t => t.Id == taskId, cancellationToken);
+    }
+
+    public async Task<IEnumerable<DomainTask>> GetAllWithCommentsAsync(CancellationToken cancellationToken)
+    {
+        return await context.Tasks
+            .Include(t => t.Comments).ToListAsync(cancellationToken);
     }
 }

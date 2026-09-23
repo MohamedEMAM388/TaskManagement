@@ -11,4 +11,10 @@ public class BaseEntity<TKey>
     public bool IsDeleted { get; set; } = false;
 
     public DateTime? DeletedAt { get; set; }
+
+    public void MarkAsDeleted(DateTime deletedAt)
+    {
+        IsDeleted = true;
+        DeletedAt = deletedAt;
+    }
 }

@@ -6,9 +6,13 @@ public interface IProjectRepository
 {
     // Create project
     public Task CreateAsync(Project project, CancellationToken cancellationToken);
+    
 
     // Get all projects
     public Task<IEnumerable<Project>> GetAllAsync(CancellationToken cancellationToken);
+    
+    // 
+    Task<Project?> GetByIdWithTasksAsync(int id, CancellationToken cancellationToken);
     
     // get by id 
     Task<Project?> GetByIdAsync(int id, CancellationToken cancellationToken);
@@ -16,8 +20,7 @@ public interface IProjectRepository
     // update
     Task UpdateAsync(Project project);
 
-    // soft delete
-    Task DeleteAsync(Project project);
+
 
     // used for uniqueness validation
     Task<bool> HasNameAsync(string name);

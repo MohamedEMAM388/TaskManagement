@@ -12,9 +12,7 @@ public class ProjectRepository(AppDbContext context) : IProjectRepository
 {
     public async Task CreateAsync(Project project, CancellationToken cancellationToken)
     {
-
         await context.Projects.AddAsync(project , cancellationToken);
-        
     }
 
     public async Task<IEnumerable<Project>> GetAllAsync(CancellationToken cancellationToken)
@@ -22,6 +20,14 @@ public class ProjectRepository(AppDbContext context) : IProjectRepository
         var projects = await context.Projects.ToListAsync(cancellationToken);
         return projects;
     }
+
+    public async Task<Project?> GetByIdWithTasksAsync(int id, CancellationToken cancellationToken)
+    {
+        return await context.Projects.Include(x => x.Tasks)
+            .ThenInclude(x => x.Comments)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
 
     public async Task<bool> HasNameAsync(string name)
     {
@@ -41,13 +47,5 @@ public class ProjectRepository(AppDbContext context) : IProjectRepository
         context.Projects.Update(project);
         return Task.CompletedTask;
     }
-
-    public Task DeleteAsync(Project project)
-    {
-        project.IsDeleted = true;
-        project.DeletedAt = DateTime.UtcNow;
-
-        context.Projects.Update(project);
-        return Task.CompletedTask;
-    }
+    
 }

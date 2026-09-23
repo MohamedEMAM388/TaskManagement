@@ -7,5 +7,4 @@ public sealed record UpdateTaskCommand(
     int Id,
     string Title,
     string Description,
-    bool IsCompleted,
     DateTime DueDate) : IRequest<Result>;

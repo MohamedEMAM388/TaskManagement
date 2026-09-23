@@ -4,8 +4,8 @@ public sealed record TaskDto(
     int Id,
     string Title,
     string Description,
-    bool IsCompleted,
     DateTime DueDate,
     int ProjectId,
+    string Status,
     DateTime CreatedAt,
     DateTime? UpdatedAt);

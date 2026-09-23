@@ -25,7 +25,7 @@ public class Task : BaseEntity<int>
     // Connect users to tasks 
     public string CreatedByUserId { get; set; } = string.Empty;
     
-    // private methods
+    // private method
     private static readonly Dictionary<TaskStatus, TaskStatus[]> StatusTransitions = new()
     {
 
@@ -59,6 +59,19 @@ public class Task : BaseEntity<int>
 
         Status = newStatus;
     }
+    
+    ////////////////
+    public void SoftDelete(DateTime deletedAt)
+    {
+        foreach (var comment in Comments)
+            comment.MarkAsDeleted(deletedAt);
+        
+        MarkAsDeleted(deletedAt);
+        
+    }
+    
+    // A completed or cancelled task is closed and can't be edited
+    public bool IsClosed => Status is TaskStatus.Cancelled or TaskStatus.Completed;
 
 }
 

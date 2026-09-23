@@ -12,7 +12,12 @@ public class AddCommentCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<
     {
         var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.TaskId, cancellationToken);
         if (task is null)
-            return Result<int>.Fail(TaskErrors.NotFound(request.TaskId));
+            return Result<int>.Fail(Error.NotFound("Task.NotFound",
+                $"Task with id '{request.TaskId}' was not found."));
+
+        if (task.IsClosed)
+            return Result<int>.Fail(Error.Conflict("Task.AlreadyClosed",
+                $"Cannot modify a task that is {task.Status}."));
 
         var comment = new Comment
         {

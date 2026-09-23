@@ -1,4 +1,3 @@
-using API.Extensions;
 using Application.Features.Authentication.Commands.DTOs;
 using Application.Features.Authentication.Commands.Login;
 using Application.Features.Authentication.Commands.LogOut;
