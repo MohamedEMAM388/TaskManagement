@@ -1,4 +1,3 @@
-using API.Extensions;
 using Application.Features.Tasks.Commands.Create;
 using Application.Features.Tasks.Commands.Delete;
 using Application.Features.Tasks.Commands.Update;
@@ -13,14 +12,14 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TasksController(ISender sender) : ControllerBase
+public class TasksController(ISender sender) : ApiBaseController
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateTaskCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         var id = result.Value;
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
@@ -31,7 +30,7 @@ public class TasksController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetTasksQuery(), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }
@@ -41,7 +40,7 @@ public class TasksController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetTaskByIdQuery(id), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }
@@ -54,7 +53,7 @@ public class TasksController(ISender sender) : ControllerBase
 
         var result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return NoContent();
     }
@@ -64,11 +63,11 @@ public class TasksController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new DeleteTaskCommand(id), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return NoContent();
     }
-    
+
     [HttpPatch("{id:int}/status")]
     public async Task<ActionResult<TaskStatus>> UpdateStatus(
         int id,
@@ -77,7 +76,7 @@ public class TasksController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new UpdateStatusCommand(id, status), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }

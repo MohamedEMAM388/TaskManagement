@@ -1,3 +1,4 @@
+using Application.Common.Identity;
 using Infrastructure.IdentityServices;
 using Infrastructure.Persistence.Identity;
 using Infrastructure.Persistence.Identity.Entities;
@@ -32,10 +33,12 @@ public static class DependencyInjection
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddIdentityCore<ApplicationUser>()
             .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<IdentityAppDbContext>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
         services.Configure<JwtSettings>(configuration.GetSection("JWT"));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }

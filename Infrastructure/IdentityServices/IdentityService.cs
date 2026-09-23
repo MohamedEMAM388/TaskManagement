@@ -25,6 +25,19 @@ public class IdentityService(UserManager<ApplicationUser> userManager ,
             user.UserName ?? string.Empty));
     }
 
+    public async Task<Result<IdentityUserResult>> GetUserByIdAsync(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return Result<IdentityUserResult>.Fail(
+                Error.NotFound("User.NotFound", $"User with id '{userId}' was not found."));
+
+        return Result<IdentityUserResult>.Ok(new IdentityUserResult(
+            user.Id, user.Email!,
+            user.FullName,
+            user.UserName ?? string.Empty));
+    }
+
     public async Task<Result> CheckPasswordAsync(string email, string password)
     {
         var user = await userManager.FindByEmailAsync(email);
@@ -109,5 +122,37 @@ public class IdentityService(UserManager<ApplicationUser> userManager ,
         await identityAppDbContext.SaveChangesAsync(ct);
 
         return Result.Ok();
+    }
+
+    public async Task<ValidateRefreshTokenResult> ValidateRefreshToken(string refreshToken, CancellationToken ct)
+    {
+        // get token 
+        var storedToken = await identityAppDbContext.RefreshTokens
+            .FirstOrDefaultAsync(x => x.Token == refreshToken , ct);
+        if (storedToken is null)
+        {
+            return new ValidateRefreshTokenResult
+            {
+                IsValid = false,
+                ErrorMessage = "Invalid refresh token"
+            };
+        }
+        
+        if (!storedToken.IsActive)
+        {
+            return new ValidateRefreshTokenResult
+            {
+                IsValid = false,
+                ErrorMessage = "Refresh token expired or revoked"
+            };
+        }
+        
+        return new ValidateRefreshTokenResult
+        {
+            IsValid = true,
+            UserId = storedToken.UserId,
+            
+            
+        };
     }
 }

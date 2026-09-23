@@ -8,6 +8,8 @@ public interface IIdentityService
 {
     // get user by email (NotFound error if the user doesn't exist)
     public Task<Result<IdentityUserResult>> GetUserByEmailAsync(string email);
+    
+    Task<Result<IdentityUserResult>> GetUserByIdAsync(string userId);
 
     // check user password (InvalidCredentials error if the email or password is wrong)
     public Task<Result> CheckPasswordAsync(string email, string password);
@@ -22,4 +24,7 @@ public interface IIdentityService
     public Task<Result> SaveRefreshTokenAsync(string userId, RefreshTokenResult refreshToken, CancellationToken ct);
     
     Task<Result> RevokeRefreshTokenAsync(string refreshToken, CancellationToken ct = default);
+    
+    // refresh token
+    public Task<ValidateRefreshTokenResult>  ValidateRefreshToken(string refreshToken , CancellationToken ct);
 }

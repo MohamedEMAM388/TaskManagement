@@ -1,4 +1,3 @@
-using API.Extensions;
 using Application.Features.Projects.Commands.Create;
 using Application.Features.Projects.Commands.Delete;
 using Application.Features.Projects.Commands.Update;
@@ -11,14 +10,14 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProjectsController(ISender sender) : ControllerBase
+public class ProjectsController(ISender sender) : ApiBaseController
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateProjectCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         var id = result.Value;
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
@@ -29,7 +28,7 @@ public class ProjectsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetProjectsQuery(), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }
@@ -39,7 +38,7 @@ public class ProjectsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetProjectByIdQuery(id), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }
@@ -52,7 +51,7 @@ public class ProjectsController(ISender sender) : ControllerBase
 
         var result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return NoContent();
     }
@@ -62,7 +61,7 @@ public class ProjectsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new DeleteProjectCommand(id), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return NoContent();
     }

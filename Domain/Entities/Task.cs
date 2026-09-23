@@ -22,6 +22,9 @@ public class Task : BaseEntity<int>
     // Navigation Property
     public ICollection<Comment> Comments { get; init; } = [];
     
+    // Connect users to tasks 
+    public string CreatedByUserId { get; set; } = string.Empty;
+    
     // private methods
     private static readonly Dictionary<TaskStatus, TaskStatus[]> StatusTransitions = new()
     {

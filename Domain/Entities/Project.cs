@@ -11,4 +11,7 @@ public class Project : BaseEntity<int>
     public ProjectStatus Status { get; set; }
 
     public ICollection<Task> Tasks { get; init; } = [];
+    
+    // Connect users to Projects 
+    public string CreatedByUserId { get; set; } = string.Empty;
 }

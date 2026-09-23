@@ -1,4 +1,3 @@
-using API.Extensions;
 using Application.Features.Comments.Commands.Add;
 using Application.Features.Comments.Commands.Delete;
 using Application.Features.Comments.Queries.GetTaskComments;
@@ -9,14 +8,14 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CommentsController(ISender sender) : ControllerBase
+public class CommentsController(ISender sender) : ApiBaseController
 {
     [HttpPost]
     public async Task<IActionResult> Add(AddCommentCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         var id = result.Value;
         return CreatedAtAction(nameof(GetTaskComments), new { taskId = command.TaskId }, new { id });
@@ -27,7 +26,7 @@ public class CommentsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new GetTaskCommentsQuery(taskId), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return Ok(result.Value);
     }
@@ -37,7 +36,7 @@ public class CommentsController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new DeleteCommentCommand(id), cancellationToken);
         if (!result.IsSuccess)
-            return result.ToProblem();
+            return ToProblem(result.Errors);
 
         return NoContent();
     }

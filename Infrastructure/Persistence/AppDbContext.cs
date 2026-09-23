@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Task = Domain.Entities.Task;
+using Infrastructure.Persistence.Configurations;
 
 
 namespace Infrastructure.Persistence;
@@ -14,7 +15,9 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new ProjectConfiguration());
+        modelBuilder.ApplyConfiguration(new TaskConfiguration());
+        modelBuilder.ApplyConfiguration(new CommentConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

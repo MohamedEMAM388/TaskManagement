@@ -1,3 +1,4 @@
+using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
 using Application.Features.Projects;
@@ -6,7 +7,8 @@ using MediatR;
 
 namespace Application.Features.Tasks.Commands.Create;
 
-public class CreateTaskCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<CreateTaskCommand, Result<int>>
+public class CreateTaskCommandHandler(IUnitOfWork unitOfWork , 
+    IUserService userService) : IRequestHandler<CreateTaskCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
@@ -16,12 +18,18 @@ public class CreateTaskCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<
         if (project is null)
             return Result<int>.Fail(ProjectErrors.NotFound(request.ProjectId));
 
+        // get user 
+        var userId = userService.UserId;
+        if (userId is null)
+            return Result<int>.Fail(Error.Validation(
+                "User.NotAuthenticated", "User is not authenticated"));
         var task = new DomainTask
         {
             Title = request.Title,
             Description = request.Description,
             DueDate = request.DueDate,
-            ProjectId = project.Id
+            ProjectId = project.Id,
+            CreatedByUserId =  userId,
         };
 
         await unitOfWork.TaskRepository.CreateTaskAsync(task, cancellationToken);
