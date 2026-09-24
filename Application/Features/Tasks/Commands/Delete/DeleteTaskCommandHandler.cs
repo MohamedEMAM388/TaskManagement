@@ -11,7 +11,7 @@ public class DeleteTaskCommandHandler(
 {
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        var task = await unitOfWork.TaskRepository.GetTaskByIdWithCommentsAsync(request.Id, cancellationToken);
+        var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.Id, cancellationToken);
         if (task is null)
             return Result.Fail(TaskErrors.NotFound(request.Id));
 
@@ -24,7 +24,7 @@ public class DeleteTaskCommandHandler(
             return Result.Fail(Error.Forbidden(
                 "Task.Forbidden", "You are not allowed to delete this task."));
 
-        task.SoftDelete(DateTime.UtcNow);
+        await unitOfWork.TaskRepository.DeleteTaskAsync(task);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
