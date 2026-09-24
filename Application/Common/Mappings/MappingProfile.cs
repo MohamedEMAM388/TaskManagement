@@ -1,6 +1,6 @@
 using Application.Features.Comments.Dtos;
 using Application.Features.Projects.DTOS;
-using Application.Features.Tasks.Dtos;
+using Application.Features.Tasks.DTOs;
 using AutoMapper;
 using Domain.Entities;
 using DomainTask = Domain.Entities.Task;

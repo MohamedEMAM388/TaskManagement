@@ -1,5 +1,5 @@
 using Application.Common.ResultPattern;
-using Application.Features.Tasks.Dtos;
+using Application.Features.Tasks.DTOs;
 using Application.Contracts;
 using AutoMapper;
 using MediatR;

@@ -1,4 +1,4 @@
-namespace Application.Features.Tasks.Dtos;
+namespace Application.Features.Tasks.DTOs;
 
 public sealed record TaskDto(
     int Id,

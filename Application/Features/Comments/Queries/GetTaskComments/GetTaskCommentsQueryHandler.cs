@@ -15,7 +15,9 @@ public class GetTaskCommentsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         // Confirms the task exists (and isn't soft-deleted) before listing its comments.
         var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.TaskId, cancellationToken);
         if (task is null)
-            return Result<List<CommentDto>>.Fail(TaskErrors.NotFound(request.TaskId));
+            return Result<List<CommentDto>>.Fail(Error.NotFound(
+                "Task.NotFound",
+                $"Task with ID {request.TaskId} was not found"));
 
         var comments = await unitOfWork.CommentRepository.GetByTaskIdAsync(request.TaskId, cancellationToken);
         return Result<List<CommentDto>>.Ok(mapper.Map<List<CommentDto>>(comments));

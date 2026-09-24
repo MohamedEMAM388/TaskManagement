@@ -12,8 +12,7 @@ public class CreateTaskCommandHandler(IUnitOfWork unitOfWork ,
 {
     public async Task<Result<int>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        // Global query filter already excludes soft-deleted projects, so a null
-        // result here covers both "doesn't exist" and "was deleted".
+
         var project = await unitOfWork.ProjectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
         if (project is null)
             return Result<int>.Fail(Error.NotFound("Project.NotFound",
@@ -28,6 +27,12 @@ public class CreateTaskCommandHandler(IUnitOfWork unitOfWork ,
         if (userId is null)
             return Result<int>.Fail(Error.Validation(
                 "User.NotAuthenticated", "User is not authenticated"));
+        
+        // Only the project owner can create tasks inside it
+        if (project.CreatedByUserId != userId)
+            return Result<int>.Fail(Error.Forbidden("Project.Forbidden",
+                "You are not allowed to add tasks to this project."));
+        
         var task = new DomainTask
         {
             Title = request.Title,

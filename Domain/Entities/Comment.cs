@@ -9,4 +9,7 @@ public class Comment : BaseEntity<int>
 
     // Navigation Property
     public Task Task { get; init; } = null!;
+    
+    // Connect users to comments 
+    public string CreatedByUserId { get; set; } = string.Empty;
 }

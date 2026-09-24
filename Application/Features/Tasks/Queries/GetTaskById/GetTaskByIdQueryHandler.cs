@@ -1,5 +1,5 @@
 using Application.Common.ResultPattern;
-using Application.Features.Tasks.Dtos;
+using Application.Features.Tasks.DTOs;
 using Application.Contracts;
 using AutoMapper;
 using MediatR;
@@ -13,7 +13,9 @@ public class GetTaskByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.Id, cancellationToken);
         if (task is null)
-            return Result<TaskDto>.Fail(TaskErrors.NotFound(request.Id));
+            return Result<TaskDto>.Fail(Error.NotFound(
+                "Task.NotFound",
+                $"Task with ID {request.Id} was not found"));
 
         return Result<TaskDto>.Ok(mapper.Map<TaskDto>(task));
     }

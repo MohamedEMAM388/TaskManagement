@@ -19,7 +19,7 @@ public class Project : BaseEntity<int>
     public void SoftDelete(DateTime deletedAt)
     {
         foreach (var task in Tasks)
-           task.MarkAsDeleted(deletedAt);
+           task.SoftDelete(deletedAt);
         
         MarkAsDeleted(deletedAt);
         

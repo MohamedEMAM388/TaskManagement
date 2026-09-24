@@ -25,7 +25,7 @@ public class Task : BaseEntity<int>
     // Connect users to tasks 
     public string CreatedByUserId { get; set; } = string.Empty;
     
-    // private method
+    // 
     private static readonly Dictionary<TaskStatus, TaskStatus[]> StatusTransitions = new()
     {
 
@@ -47,15 +47,14 @@ public class Task : BaseEntity<int>
 
     };
 
+    public bool CanChangeStatusTo(TaskStatus newStatus) =>
+        StatusTransitions.TryGetValue(Status, out var allowedStatuses)
+        && allowedStatuses.Contains(newStatus);
+
     public void ChangeStatus(TaskStatus newStatus)
     {
-        if (!StatusTransitions.TryGetValue(Status, out var allowedStatuses)
-            || !allowedStatuses.Contains(newStatus))
-        {
-            throw new InvalidTaskStatusTransitionException(
-                Status,
-                newStatus);
-        }
+        if (!CanChangeStatusTo(newStatus))
+            throw new InvalidTaskStatusTransitionException(Status, newStatus);
 
         Status = newStatus;
     }

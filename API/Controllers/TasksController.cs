@@ -4,7 +4,9 @@ using Application.Features.Tasks.Commands.Update;
 using Application.Features.Tasks.Queries.GetTaskById;
 using Application.Features.Tasks.Queries.GetTasks;
 using Application.Features.Tasks.Commands.UpdateStatus;
+using Application.Features.Tasks.DTOs;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskStatus = Domain.Entities.Enums.TaskStatus;
 
@@ -12,6 +14,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TasksController(ISender sender) : ApiBaseController
 {
     [HttpPost]
@@ -69,15 +72,15 @@ public class TasksController(ISender sender) : ApiBaseController
     }
 
     [HttpPatch("{id:int}/status")]
-    public async Task<ActionResult<TaskStatus>> UpdateStatus(
+    public async Task<IActionResult> UpdateStatus(
         int id,
-        [FromBody] TaskStatus status,
+        [FromBody] UpdateTaskStatusDto dto,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateStatusCommand(id, status), cancellationToken);
+        var result = await sender.Send(new UpdateStatusCommand(id, dto.Status), cancellationToken);
         if (!result.IsSuccess)
             return ToProblem(result.Errors);
 
-        return Ok(result.Value);
+        return Ok(new { status = result.Value });
     }
 }

@@ -13,7 +13,9 @@ public class GetProjectByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         var project = await unitOfWork.ProjectRepository.GetByIdAsync(request.Id, cancellationToken);
         if (project is null)
-            return Result<ProjectDto>.Fail(ProjectErrors.NotFound(request.Id));
+            return Result<ProjectDto>.Fail(Error.NotFound(
+                "Project.NotFound",
+                $"Project with ID {request.Id} was not found"));
 
         return Result<ProjectDto>.Ok(mapper.Map<ProjectDto>(project));
     }

@@ -13,7 +13,9 @@ public class UpdateTaskCommandHandler(
     {
         var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.Id, cancellationToken);
         if (task is null)
-            return Result.Fail(TaskErrors.NotFound(request.Id));
+            return Result.Fail(Error.NotFound(
+                "Task.NotFound",
+                $"Task with ID {request.Id} was not found"));
 
         var userId = userService.UserId;
         if (userId is null)
@@ -23,6 +25,11 @@ public class UpdateTaskCommandHandler(
         if (task.CreatedByUserId != userId)
             return Result.Fail(Error.Forbidden(
                 "Task.Forbidden", "You are not allowed to modify this task."));
+        
+        
+        if (task.IsClosed)
+            return Result.Fail(Error.Conflict("Task.AlreadyClosed",
+                $"Cannot modify a task that is {task.Status}."));
 
         task.Title = request.Title;
         task.Description = request.Description;

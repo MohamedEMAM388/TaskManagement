@@ -11,9 +11,12 @@ public class DeleteTaskCommandHandler(
 {
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.Id, cancellationToken);
+        // load the task with its comments so they are softly deleted with it
+        var task = await unitOfWork.TaskRepository.GetTaskByIdWithCommentsAsync(request.Id, cancellationToken);
         if (task is null)
-            return Result.Fail(TaskErrors.NotFound(request.Id));
+            return Result.Fail(Error.NotFound(
+                "Task.NotFound",
+                $"Task with ID {request.Id} was not found"));
 
         var userId = userService.UserId;
         if (userId is null)
@@ -24,7 +27,7 @@ public class DeleteTaskCommandHandler(
             return Result.Fail(Error.Forbidden(
                 "Task.Forbidden", "You are not allowed to delete this task."));
 
-        await unitOfWork.TaskRepository.DeleteTaskAsync(task);
+        task.SoftDelete(DateTime.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

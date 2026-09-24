@@ -13,7 +13,9 @@ public class UpdateProjectCommandHandler(
     {
         var project = await unitOfWork.ProjectRepository.GetByIdAsync(request.Id, cancellationToken);
         if (project is null)
-            return Result.Fail(ProjectErrors.NotFound(request.Id));
+            return Result.Fail(Error.NotFound(
+                "Project.NotFound",
+                $"Project with ID {request.Id} was not found"));
 
         // Allow users to modify only their own Projects.
         var userId = userService.UserId;

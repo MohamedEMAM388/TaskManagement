@@ -1,7 +1,11 @@
+using System.Text;
+using System.Text.Json.Serialization;
 using API.Middlewares;
 using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Negotiate;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API;
 
@@ -12,26 +16,26 @@ public static class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Controllers
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         // Add services to the container
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddProblemDetails();
 
-        builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-            .AddNegotiate();
 
-        builder.Services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = options.DefaultPolicy;
-        });
+
+        builder.Services.AddAuthorization();
 
         var app = builder.Build();
 
-        // Global exception handling: converts FluentValidation/NotFound/BusinessRule
-        // exceptions thrown from handlers into proper HTTP responses (400/404/500).
+    
+        // Global exception handling: converts unhandled exceptions
+        // into standardized HTTP responses.
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         // Swagger

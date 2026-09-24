@@ -1,3 +1,4 @@
+using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
 using Application.Features.Tasks;
@@ -6,10 +7,16 @@ using MediatR;
 
 namespace Application.Features.Comments.Commands.Add;
 
-public class AddCommentCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AddCommentCommand, Result<int>>
+public class AddCommentCommandHandler(IUnitOfWork unitOfWork,
+    IUserService userService) : IRequestHandler<AddCommentCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(AddCommentCommand request, CancellationToken cancellationToken)
     {
+        var userId = userService.UserId;
+        if (userId is null)
+            return Result<int>.Fail(Error.Unauthorized(
+                "User.NotAuthenticated", "User is not authenticated"));
+        
         var task = await unitOfWork.TaskRepository.GetTaskByIdAsync(request.TaskId, cancellationToken);
         if (task is null)
             return Result<int>.Fail(Error.NotFound("Task.NotFound",
@@ -19,10 +26,15 @@ public class AddCommentCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<
             return Result<int>.Fail(Error.Conflict("Task.AlreadyClosed",
                 $"Cannot modify a task that is {task.Status}."));
 
+        // Only the task owner (or whoever owns the parent project) can comment
+        if (task.CreatedByUserId != userId)
+            return Result<int>.Fail(Error.Forbidden("Comment.Forbidden",
+                "You are not allowed to comment on this task."));
         var comment = new Comment
         {
             Content = request.Content,
-            TaskId = task.Id
+            TaskId = task.Id,
+            CreatedByUserId = userId,
         };
 
         await unitOfWork.CommentRepository.AddAsync(comment, cancellationToken);

@@ -18,6 +18,16 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             await WriteResponse(context, HttpStatusCode.BadRequest,
                 "InvalidTaskStatusTransition", ex.Message);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            await WriteResponse(context, HttpStatusCode.Forbidden,
+                "General.Forbidden", ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            await WriteResponse(context, HttpStatusCode.NotFound,
+                "General.NotFound", ex.Message);
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception");

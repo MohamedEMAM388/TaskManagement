@@ -11,9 +11,12 @@ public class DeleteProjectCommandHandler(
 {
     public async Task<Result> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
     {
-        var project = await unitOfWork.ProjectRepository.GetByIdAsync(request.Id, cancellationToken);
+       
+        var project = await unitOfWork.ProjectRepository.GetByIdWithTasksAsync(request.Id, cancellationToken);
         if (project is null)
-            return Result.Fail(ProjectErrors.NotFound(request.Id));
+            return Result.Fail(Error.NotFound(
+                "Project.NotFound",
+                $"Project with ID {request.Id} was not found"));
 
         var userId = userService.UserId;
         if (userId is null)
@@ -24,7 +27,7 @@ public class DeleteProjectCommandHandler(
             return Result.Fail(Error.Forbidden(
                 "Project.Forbidden", "You are not allowed to delete this project."));
 
-        await unitOfWork.ProjectRepository.DeleteAsync(project);
+        project.SoftDelete(DateTime.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

@@ -2,12 +2,14 @@ using Application.Features.Comments.Commands.Add;
 using Application.Features.Comments.Commands.Delete;
 using Application.Features.Comments.Queries.GetTaskComments;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CommentsController(ISender sender) : ApiBaseController
 {
     [HttpPost]
