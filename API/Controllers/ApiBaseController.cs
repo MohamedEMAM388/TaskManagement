@@ -1,5 +1,4 @@
 using Application.Common.ResultPattern;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -47,8 +46,8 @@ namespace API.Controllers
                 ErrorType.NotFound => StatusCodes.Status404NotFound,
                 ErrorType.Validation => StatusCodes.Status400BadRequest,
                 ErrorType.Conflict => StatusCodes.Status409Conflict,
-                ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
-                ErrorType.InvalidCredentials => StatusCodes.Status401Unauthorized,
+                ErrorType.Unauthorized or ErrorType.InvalidCredentials 
+                             => StatusCodes.Status401Unauthorized,
                 ErrorType.Forbidden => StatusCodes.Status403Forbidden,
                 _ => StatusCodes.Status500InternalServerError
             };

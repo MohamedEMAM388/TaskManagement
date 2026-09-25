@@ -8,13 +8,12 @@ using Application.Features.Tasks.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskStatus = Domain.Entities.Enums.TaskStatus;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = "AnyAuthenticatedUser")]
 public class TasksController(ISender sender) : ApiBaseController
 {
     [HttpPost]

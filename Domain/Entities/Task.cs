@@ -1,9 +1,10 @@
+using Domain.Common;
 using Domain.Exceptions;
 using TaskStatus = Domain.Entities.Enums.TaskStatus;
 
 namespace Domain.Entities;
 
-public class Task : BaseEntity<int>
+public class Task : BaseEntity<int> , IHasOwner
 {
     public string Title { get; set; } = string.Empty;
 

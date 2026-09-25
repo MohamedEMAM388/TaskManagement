@@ -5,7 +5,6 @@ using Application.Features.Authentication.Commands.RefreshToken;
 using Application.Features.Authentication.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -15,6 +14,7 @@ namespace API.Controllers
     public class Authentication(ISender sender) : ApiBaseController
     {
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserDto>> Login(LoginDto dto, CancellationToken cancellationToken)
         {
             var command = new LoginCommand(dto);
@@ -23,6 +23,7 @@ namespace API.Controllers
         }
 
         [HttpPost("Register")]
+        [AllowAnonymous]
         public async Task<ActionResult<UserDto>> Register(RegisterDto dto, CancellationToken cancellationToken)
         {
             var command = new RegisterCommand(dto);
@@ -40,15 +41,14 @@ namespace API.Controllers
         
         [HttpPost("refresh")]
         [AllowAnonymous]
-        public async Task<IActionResult> Refresh(
+        public async Task<ActionResult<UserDto>> Refresh(
             [FromBody] RefreshTokenDto request,
             CancellationToken cancellationToken)
         {
-            
             var result = await sender.Send(
                 new RefreshTokenCommand(request.RefreshToken), cancellationToken);
 
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Errors);
+            return ToActionResult(result);
         }
     }
 }

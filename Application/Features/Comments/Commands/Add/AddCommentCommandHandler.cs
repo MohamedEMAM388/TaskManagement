@@ -1,7 +1,6 @@
 using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
-using Application.Features.Tasks;
 using Domain.Entities;
 using MediatR;
 
@@ -25,9 +24,18 @@ public class AddCommentCommandHandler(IUnitOfWork unitOfWork,
         if (task.IsClosed)
             return Result<int>.Fail(Error.Conflict("Task.AlreadyClosed",
                 $"Cannot modify a task that is {task.Status}."));
+        
 
-        // Only the task owner (or whoever owns the parent project) can comment
-        if (task.CreatedByUserId != userId)
+        // The task owner or the owner of the parent project can comment
+        var project = await unitOfWork.ProjectRepository.GetByIdAsync(task.ProjectId, cancellationToken);
+        if (project is null)
+            return Result<int>.Fail(Error.NotFound("Project.NotFound",
+                $"Project with id '{task.ProjectId}' was not found."));
+        
+        var canComment = task.CreatedByUserId == userId
+                         || project.CreatedByUserId == userId;
+
+        if (!canComment)
             return Result<int>.Fail(Error.Forbidden("Comment.Forbidden",
                 "You are not allowed to comment on this task."));
         var comment = new Comment

@@ -14,13 +14,20 @@ public class RefreshTokenCommandHandler(IIdentityService identityService ,
         var validateRefreshToken = await identityService
             .ValidateRefreshToken(request.RefreshToken, cancellationToken);
 
+        if (!validateRefreshToken.IsValid || validateRefreshToken.UserId is null)
+            return Result<UserDto>.Fail(Error.Unauthorized(
+                "Auth.InvalidRefreshToken",
+                validateRefreshToken.ErrorMessage ?? "Invalid or expired refresh token"));
+        
         var userId = validateRefreshToken.UserId;
         if (userId is null)
             return Result<UserDto>.Fail(new Error
                 ("InvalidToken", "Invalid or expired refresh token"));
+        
         var userResult = await identityService.GetUserByIdAsync(userId);
         if (!userResult.IsSuccess)
-            return Result<UserDto>.Fail(userResult.Errors);
+            return Result<UserDto>.Fail(Error.Unauthorized(
+                "Auth.InvalidRefreshToken", "Invalid or expired refresh token"));
 
         var user = userResult.Value;
         

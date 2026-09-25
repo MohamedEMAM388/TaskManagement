@@ -1,6 +1,7 @@
 using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
+using Application.Features.Authentication.Commands.DTOs;
 using Application.Features.Authentication.Commands.Register;
 using Infrastructure.Persistence.Identity;
 using Infrastructure.Persistence.Identity.Entities;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.IdentityServices;
 
 public class IdentityService(UserManager<ApplicationUser> userManager ,
-    IdentityAppDbContext identityAppDbContext) : IIdentityService
+    IdentityAppDbContext identityAppDbContext , RoleManager<IdentityRole<string>> roleManager) : IIdentityService
 {
     public async Task<Result<IdentityUserResult>> GetUserByEmailAsync(string email)
     {
@@ -50,8 +51,10 @@ public class IdentityService(UserManager<ApplicationUser> userManager ,
             : Result.Fail(Error.InvalidCredentials());
     }
 
-    public async Task<Result<IdentityUserResult>> CreateUserAsync(RegisterDto registerDto, CancellationToken ct)
+    public async Task<Result<IdentityUserResult>> CreateUserAsync(RegisterDto registerDto,
+        string role,CancellationToken ct)
     {
+        
         var user = new ApplicationUser()
         {
             Email = registerDto.Email,
@@ -63,7 +66,22 @@ public class IdentityService(UserManager<ApplicationUser> userManager ,
         if (isCreated.Succeeded)
             return Result<IdentityUserResult>.Ok(
                 new IdentityUserResult(user.Id, user.Email, user.FullName, user.UserName));
-        
+
+        if (!await roleManager.RoleExistsAsync(role))
+              await roleManager.CreateAsync(new IdentityRole(role));
+
+        var addToRoleResult = await userManager.AddToRoleAsync(user, role);
+        if (!addToRoleResult.Succeeded)
+        {
+            // rollback: لو فشل إضافة الرول، احذف اليوزر
+            await userManager.DeleteAsync(user);
+
+            var errors02 = addToRoleResult.Errors
+                .Select(e => Error.Failure(e.Code, e.Description))
+                .ToList();
+            return Result<IdentityUserResult>.Fail(errors02);
+        }
+            
         var errors = isCreated.Errors
             .Select(error => new Error(error.Code, error.Description)).ToList();
         return Result<IdentityUserResult>.Fail(errors);

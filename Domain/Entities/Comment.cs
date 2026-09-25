@@ -1,6 +1,8 @@
+using Domain.Common;
+
 namespace Domain.Entities;
 
-public class Comment : BaseEntity<int>
+public class Comment : BaseEntity<int> , IHasOwner
 {
     public string Content { get; set; } = string.Empty;
 

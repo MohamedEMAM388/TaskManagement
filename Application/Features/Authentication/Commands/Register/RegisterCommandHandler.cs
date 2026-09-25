@@ -18,7 +18,7 @@ public class RegisterCommandHandler(IIdentityService identityService,
                 $"An account with email '{request.RegisterDto.Email}' already exists."));
 
         var userResult = await identityService
-            .CreateUserAsync(request.RegisterDto, cancellationToken);
+            .CreateUserAsync(request.RegisterDto, "User" , cancellationToken);
         if (!userResult.IsSuccess)
             return Result<UserDto>.Fail(userResult.Errors);
 

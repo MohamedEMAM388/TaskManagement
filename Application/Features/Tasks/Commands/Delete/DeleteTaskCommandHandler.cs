@@ -2,12 +2,14 @@ using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Features.Tasks.Commands.Delete;
 
 public class DeleteTaskCommandHandler(
     IUnitOfWork unitOfWork,
-    IUserService userService) : IRequestHandler<DeleteTaskCommand, Result>
+    IUserService userService,
+    IAuthorizationService authorizationService) : IRequestHandler<DeleteTaskCommand, Result>
 {
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
@@ -18,12 +20,13 @@ public class DeleteTaskCommandHandler(
                 "Task.NotFound",
                 $"Task with ID {request.Id} was not found"));
 
-        var userId = userService.UserId;
-        if (userId is null)
-            return Result.Fail(Error.Validation(
+        var user = userService.User;
+        if (user is null)
+            return Result.Fail(Error.Unauthorized(
                 "User.NotAuthenticated", "User is not authenticated"));
 
-        if (task.CreatedByUserId != userId)
+        var authResult = await authorizationService.AuthorizeAsync(user, task, "ResourceOwner");
+        if (!authResult.Succeeded)
             return Result.Fail(Error.Forbidden(
                 "Task.Forbidden", "You are not allowed to delete this task."));
 

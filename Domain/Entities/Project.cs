@@ -1,8 +1,9 @@
+using Domain.Common;
 using Domain.Entities.Enums;
 
 namespace Domain.Entities;
 
-public class Project : BaseEntity<int>
+public class Project : BaseEntity<int> , IHasOwner
 {
     public string Name { get; set; } = string.Empty;
 

@@ -61,6 +61,8 @@ public static class DependencyInjection
                         Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
                 };
             });
+            
+
 
         return services;
     }

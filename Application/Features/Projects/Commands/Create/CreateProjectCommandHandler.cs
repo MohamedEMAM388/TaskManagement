@@ -14,7 +14,7 @@ public class CreateProjectCommandHandler(IUnitOfWork unitOfWork ,
         // get user that will create the project
         var userId = userService.UserId;
         if (userId is null)
-            return Result<int>.Fail(Error.Validation(
+            return Result<int>.Fail(Error.Unauthorized(
                 "User.NotAuthenticated", "User is not authenticated"));
         
         var project = new Project

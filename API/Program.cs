@@ -1,17 +1,16 @@
-using System.Text;
 using System.Text.Json.Serialization;
 using API.Middlewares;
 using Application;
+using Application.Common.Authorization;
 using Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.Negotiate;
-using Microsoft.IdentityModel.Tokens;
+using Infrastructure.IdentityServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +27,21 @@ public static class Program
         builder.Services.AddProblemDetails();
 
 
-
-        builder.Services.AddAuthorization();
+   
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("AnyAuthenticatedUser", 
+                policy => policy.RequireRole("Admin", "User"))
+            .AddPolicy("ResourceOwner",
+                policy => policy.Requirements.Add(new ResourceOwnerRequirement()));
+        
+        builder.Services.AddScoped<IAuthorizationHandler, ResourceOwnerAuthorizationHandler>();
 
         var app = builder.Build();
 
-    
+        // seed roles 
+        using var scope = app.Services.CreateScope();
+        await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+
         // Global exception handling: converts unhandled exceptions
         // into standardized HTTP responses.
         app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -50,6 +58,6 @@ public static class Program
         // Controllers
         app.MapControllers();
 
-        app.Run();
+        await app.RunAsync();
     }
 }

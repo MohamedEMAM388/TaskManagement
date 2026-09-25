@@ -2,12 +2,14 @@ using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Features.Projects.Commands.Update;
 
 public class UpdateProjectCommandHandler(
     IUnitOfWork unitOfWork,
-    IUserService userService) : IRequestHandler<UpdateProjectCommand, Result>
+    IUserService userService,
+    IAuthorizationService authorizationService) : IRequestHandler<UpdateProjectCommand, Result>
 {
     public async Task<Result> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
     {
@@ -17,13 +19,13 @@ public class UpdateProjectCommandHandler(
                 "Project.NotFound",
                 $"Project with ID {request.Id} was not found"));
 
-        // Allow users to modify only their own Projects.
-        var userId = userService.UserId;
-        if (userId is null)
-            return Result.Fail(Error.Validation(
+        var user = userService.User;
+        if (user is null)
+            return Result.Fail(Error.Unauthorized(
                 "User.NotAuthenticated", "User is not authenticated"));
 
-        if (project.CreatedByUserId != userId)
+        var authResult = await authorizationService.AuthorizeAsync(user, project, "ResourceOwner");
+        if (!authResult.Succeeded)
             return Result.Fail(Error.Forbidden(
                 "Project.Forbidden", "You are not allowed to modify this project."));
 

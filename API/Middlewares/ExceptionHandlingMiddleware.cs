@@ -15,11 +15,18 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         }
         catch (InvalidTaskStatusTransitionException ex)
         {
-            await WriteResponse(context, HttpStatusCode.BadRequest,
-                "InvalidTaskStatusTransition", ex.Message);
+            await WriteResponse(context, HttpStatusCode.Conflict,
+                "Task.InvalidStatusTransition", ex.Message);
+        }
+        catch (UnauthenticatedException ex)
+        {
+            // no valid identity on the request at all.
+            await WriteResponse(context, HttpStatusCode.Unauthorized,
+                "General.Unauthenticated", ex.Message);
         }
         catch (UnauthorizedAccessException ex)
         {
+            // What are you allowed to do
             await WriteResponse(context, HttpStatusCode.Forbidden,
                 "General.Forbidden", ex.Message);
         }

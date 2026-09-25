@@ -9,7 +9,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Policy = "AnyAuthenticatedUser")]
 public class CommentsController(ISender sender) : ApiBaseController
 {
     [HttpPost]

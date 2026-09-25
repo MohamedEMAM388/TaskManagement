@@ -2,17 +2,21 @@ using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using TaskStatus = Domain.Entities.Enums.TaskStatus;
 
 namespace Application.Features.Tasks.Commands.UpdateStatus;
 
-public class UpdateStatusCommandHandler(IUnitOfWork unitOfWork, IUserService userService)
+public class UpdateStatusCommandHandler(
+    IUnitOfWork unitOfWork,
+    IUserService userService,
+    IAuthorizationService authorizationService)
     : IRequestHandler<UpdateStatusCommand, Result<TaskStatus>>
 {
     public async Task<Result<TaskStatus>> Handle(UpdateStatusCommand request, CancellationToken cancellationToken)
     {
-        var userId = userService.UserId;
-        if (userId is null)
+        var user = userService.User;
+        if (user is null)
             return Result<TaskStatus>.Fail(Error.Unauthorized(
                 "User.NotAuthenticated", "User is not authenticated"));
 
@@ -21,8 +25,8 @@ public class UpdateStatusCommandHandler(IUnitOfWork unitOfWork, IUserService use
             return Result<TaskStatus>.Fail(Error.NotFound("Task.NotFound",
                 $"Task with id '{request.TaskId}' was not found."));
 
-        // ownership الأو
-        if (task.CreatedByUserId != userId)
+        var authResult = await authorizationService.AuthorizeAsync(user, task, "ResourceOwner");
+        if (!authResult.Succeeded)
             return Result<TaskStatus>.Fail(Error.Forbidden(
                 "Task.Forbidden", "You are not allowed to modify this task."));
 

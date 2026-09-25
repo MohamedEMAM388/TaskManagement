@@ -15,7 +15,8 @@ public interface IIdentityService
     public Task<Result> CheckPasswordAsync(string email, string password);
     
     // create user 
-    public Task<Result<IdentityUserResult>> CreateUserAsync(RegisterDto registerDto,CancellationToken ct);
+    public Task<Result<IdentityUserResult>> CreateUserAsync(RegisterDto registerDto,
+        string roles ,CancellationToken ct);
     
     // get roles
     public Task<Result<IReadOnlyList<string>>> GetRolesAsync(string email, CancellationToken ct);
