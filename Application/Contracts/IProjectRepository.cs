@@ -9,7 +9,7 @@ public interface IProjectRepository
     
 
     // Get all projects
-    public Task<IEnumerable<Project>> GetAllAsync(CancellationToken cancellationToken);
+    public Task<IEnumerable<Project>> GetAllAsync( string? ownerId ,CancellationToken cancellationToken);
     
     // 
     Task<Project?> GetByIdWithTasksAsync(int id, CancellationToken cancellationToken);

@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Projects.Queries.GetProjects;
 
-public sealed record GetProjectsQuery() : IRequest<Result<List<ProjectDto>>>;
+public sealed record GetProjectsQuery(string OwnerId) : IRequest<Result<List<ProjectDto>>>;

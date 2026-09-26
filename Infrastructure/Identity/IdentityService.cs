@@ -1,7 +1,6 @@
 using Application.Common.Identity;
 using Application.Common.ResultPattern;
 using Application.Contracts;
-using Application.Features.Authentication.Commands.DTOs;
 using Application.Features.Authentication.Commands.Register;
 using Infrastructure.Persistence.Identity;
 using Infrastructure.Persistence.Identity.Entities;
@@ -11,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.IdentityServices;
 
 public class IdentityService(UserManager<ApplicationUser> userManager ,
-    IdentityAppDbContext identityAppDbContext , RoleManager<IdentityRole<string>> roleManager) : IIdentityService
+    IdentityAppDbContext identityAppDbContext ,
+    RoleManager<IdentityRole> roleManager) : IIdentityService
 {
     public async Task<Result<IdentityUserResult>> GetUserByEmailAsync(string email)
     {

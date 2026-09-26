@@ -29,9 +29,13 @@ public class TaskRepository(AppDbContext context) : ITaskRepository
         return await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId, cancellationToken);
     }
 
-    public async Task<IEnumerable<DomainTask>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<DomainTask>> GetAllAsync(string? ownerId,CancellationToken cancellationToken)
     {
-        return await context.Tasks.ToListAsync(cancellationToken);
+
+        var query = context.Tasks.AsQueryable();
+        if (ownerId is not null)
+            query = query.Where(x => x.CreatedByUserId == ownerId);
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<DomainTask?> GetTaskByIdWithCommentsAsync(int taskId, CancellationToken cancellationToken)

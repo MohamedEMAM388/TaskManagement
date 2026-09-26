@@ -1,3 +1,5 @@
+using Application.Common.Identity;
+using Application.Common.ResultPattern;
 using Application.Features.Tasks.Commands.Create;
 using Application.Features.Tasks.Commands.Delete;
 using Application.Features.Tasks.Commands.Update;
@@ -14,7 +16,7 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "AnyAuthenticatedUser")]
-public class TasksController(ISender sender) : ApiBaseController
+public class TasksController(ISender sender , IUserService currentUser) : ApiBaseController
 {
     [HttpPost]
     public async Task<IActionResult> Create(CreateTaskCommand command, CancellationToken cancellationToken)
@@ -30,7 +32,14 @@ public class TasksController(ISender sender) : ApiBaseController
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetTasksQuery(), cancellationToken);
+        var userId = currentUser.UserId;
+        if (userId == null)
+            return ToProblem([
+                new Error("User.Unauthorized",
+                    "Could not resolve the current user.",
+                    ErrorType.Unauthorized)
+            ]);
+        var result = await sender.Send(new GetTasksQuery(userId), cancellationToken);
         if (!result.IsSuccess)
             return ToProblem(result.Errors);
 

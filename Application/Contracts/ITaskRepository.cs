@@ -15,7 +15,7 @@ public interface ITaskRepository
     public Task<DomainTask?> GetTaskByIdAsync(int taskId, CancellationToken cancellationToken);
 
     // get all
-    public Task<IEnumerable<DomainTask>> GetAllAsync(CancellationToken cancellationToken);
+    public Task<IEnumerable<DomainTask>> GetAllAsync(string? ownerId ,CancellationToken cancellationToken);
     
     // 
     Task<DomainTask?> GetTaskByIdWithCommentsAsync(int taskId, CancellationToken cancellationToken);

@@ -15,10 +15,13 @@ public class ProjectRepository(AppDbContext context) : IProjectRepository
         await context.Projects.AddAsync(project , cancellationToken);
     }
 
-    public async Task<IEnumerable<Project>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<Project>> GetAllAsync(string? ownerId,CancellationToken cancellationToken)
     {
-        var projects = await context.Projects.ToListAsync(cancellationToken);
-        return projects;
+        var query = context.Projects.AsQueryable();
+        if(ownerId is not null)
+            query = query.Where(x => x.CreatedByUserId == ownerId);
+        
+        return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<Project?> GetByIdWithTasksAsync(int id, CancellationToken cancellationToken)
