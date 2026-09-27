@@ -1,3 +1,3 @@
-namespace Application.Features.Authentication.Commands.DTOs;
+namespace Application.Features.Authentication.DTOs;
 
 public record RefreshTokenDto(string RefreshToken);

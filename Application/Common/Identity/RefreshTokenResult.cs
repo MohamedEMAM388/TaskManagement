@@ -2,7 +2,7 @@ namespace Application.Common.Identity;
 
 public class RefreshTokenResult
 {
-    public string Token { get; set; } = string.Empty;
-    public DateTime ExpiresOn { get; set; }
-    public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+    public string Token { get; init; } = string.Empty;
+    public DateTime ExpiresOn { get; init; }
+    public DateTime CreatedOn { get; init; } = DateTime.UtcNow;
 }

@@ -1,6 +1,7 @@
 using System.Text;
 using Application.Common.Identity;
-using Infrastructure.IdentityServices;
+using Infrastructure.BackgroundJobs;
+using Infrastructure.Identity;
 using Infrastructure.Persistence.Identity;
 using Infrastructure.Persistence.Identity.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +15,9 @@ using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Hangfire;
+
+
 
 public static class DependencyInjection
 {
@@ -62,6 +66,13 @@ public static class DependencyInjection
                 };
             });
             
+            // add hangfire 
+            services.AddScoped<RefreshTokenCleanupJob>();
+
+            services.AddHangfire(config => config
+                .UseSqlServerStorage(configuration.GetConnectionString("IdentityConnection")));
+
+            services.AddHangfireServer();
 
 
         return services;

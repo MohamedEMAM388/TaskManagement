@@ -7,7 +7,7 @@ using Application.Contracts;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Infrastructure.IdentityServices;
+namespace Infrastructure.Identity;
 
 public class TokenService : ITokenService
 {

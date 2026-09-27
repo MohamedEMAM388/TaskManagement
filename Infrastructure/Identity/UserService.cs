@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Application.Common.Identity;
 using Microsoft.AspNetCore.Http;
 
-namespace Infrastructure.IdentityServices;
+namespace Infrastructure.Identity;
 
 public class UserService: IUserService
 {

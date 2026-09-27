@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.IdentityServices;
+namespace Infrastructure.Identity;
 
 public class IdentitySeeder ()
 {

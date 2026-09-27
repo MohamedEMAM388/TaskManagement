@@ -3,6 +3,7 @@ using Application.Features.Authentication.Commands.Login;
 using Application.Features.Authentication.Commands.LogOut;
 using Application.Features.Authentication.Commands.RefreshToken;
 using Application.Features.Authentication.Commands.Register;
+using Application.Features.Authentication.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

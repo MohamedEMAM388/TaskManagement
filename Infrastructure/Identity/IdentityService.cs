@@ -7,7 +7,7 @@ using Infrastructure.Persistence.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.IdentityServices;
+namespace Infrastructure.Identity;
 
 public class IdentityService(UserManager<ApplicationUser> userManager ,
     IdentityAppDbContext identityAppDbContext ,
@@ -73,7 +73,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager ,
         var addToRoleResult = await userManager.AddToRoleAsync(user, role);
         if (!addToRoleResult.Succeeded)
         {
-            // rollback: لو فشل إضافة الرول، احذف اليوزر
+            
             await userManager.DeleteAsync(user);
 
             var errors02 = addToRoleResult.Errors

@@ -1,9 +1,12 @@
 using System.Text.Json.Serialization;
+using API.HangFireAuthorization;
 using API.Middlewares;
 using Application;
 using Application.Common.Authorization;
+using Hangfire;
 using Infrastructure;
-using Infrastructure.IdentityServices;
+using Infrastructure.BackgroundJobs;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API;
@@ -45,6 +48,19 @@ public static class Program
         // Global exception handling: converts unhandled exceptions
         // into standardized HTTP responses.
         app.UseMiddleware<ExceptionHandlingMiddleware>();
+        
+        // hangfire dashboard
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = [new HangfireAdminAuthorizationFilter()]
+        });
+
+        // add refresh token 
+        RecurringJob.AddOrUpdate<RefreshTokenCleanupJob>(
+            "cleanup-expired-refresh-tokens",
+            job => job.DeleteExpiredTokensAsync(),
+            Cron.Daily);
+        
 
         // Swagger
         app.UseSwagger();
