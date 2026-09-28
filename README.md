@@ -1,6 +1,8 @@
-# TaskManagement
+# TaskManagement API
 
-A RESTful **Task Management API** built with **ASP.NET Core (.NET 9)** using **Clean Architecture** and **CQRS**. Users can register, organize their work into **projects**, break projects down into **tasks**, and discuss tasks through **comments**, all secured with JWT authentication and resource-level authorization.
+A RESTful **Task Management API** built with **ASP.NET Core (.NET 9)** using **Clean Architecture** and **CQRS**.
+
+Users can register, organize their work into **projects**, break each project down into **tasks**, and discuss tasks through **comments**. Everything is secured with JWT authentication and resource-level authorization, so users only manage what they own.
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4)
@@ -11,11 +13,10 @@ A RESTful **Task Management API** built with **ASP.NET Core (.NET 9)** using **C
 
 ## Table of Contents
 
+- [Project Idea](#project-idea)
 - [Features](#features)
-- [Tech Stack](#tech-stack)
+- [Technologies and Services Used](#technologies-and-services-used)
 - [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
 - [API Overview](#api-overview)
 - [Business Rules](#business-rules)
 - [Error Handling](#error-handling)
@@ -24,37 +25,66 @@ A RESTful **Task Management API** built with **ASP.NET Core (.NET 9)** using **C
 
 ---
 
+## Project Idea
+
+The system models a simple work-management workflow:
+
+1. A **user** creates an account and logs in.
+2. The user creates **projects** (for example, "Website Redesign").
+3. Each project contains **tasks** that move through a defined status workflow (`Todo → InProgress → Completed`).
+4. Each task has **comments** where the discussion happens.
+
+Every resource belongs to the user who created it. Only that user (or an Admin) can modify or delete it.
+
 ## Features
 
-- **Authentication and authorization**
-  - Register / login with JWT access tokens
-  - Refresh tokens stored server-side: refreshing issues a new token pair, and logout revokes the refresh token
-  - Role-based access (`Admin`, `User`) plus **resource-owner policies**: only the creator of a resource (or an Admin) can modify or delete it
-- **Projects, tasks and comments** with full CRUD
-- **Task status workflow** enforced in the domain layer (invalid transitions are rejected)
-- **Soft delete** with cascading (project → tasks → comments) and global EF Core query filters
-- **CQRS with MediatR**, including pipeline behaviors for **logging** and **validation** (FluentValidation)
-- **Result pattern** for predictable, exception-free error flow in the application layer
-- **Global exception handling** middleware returning standard `application/problem+json` responses
-- **Hangfire** background job for cleaning up expired refresh tokens, with a protected dashboard
-- **Swagger / OpenAPI** documentation out of the box
+### Authentication and authorization
+- Register and login with **JWT access tokens**.
+- **Refresh tokens** stored server-side: refreshing issues a new token pair, and logout revokes the refresh token.
+- **Role-based access** with two roles: `Admin` and `User`.
+- **Resource-owner policies**: only the creator of a project, task or comment (or an Admin) can modify or delete it.
 
-## Tech Stack
+### Core functionality
+- **Projects, tasks and comments** with full CRUD.
+- **Task status workflow** enforced in the domain layer, so invalid transitions are rejected.
+- **Soft delete** with cascading (project → tasks → comments) using global EF Core query filters.
 
-| Area | Technology |
+### Application design
+- **CQRS with MediatR**: every use case is a separate command or query with its own handler.
+- **Pipeline behaviors** for cross-cutting concerns: **logging** and **validation** (FluentValidation) run automatically around every request.
+- **Result pattern**: expected failures (not found, forbidden, conflict, validation) are returned as values instead of thrown as exceptions.
+- **Global exception handling** middleware that returns standard `application/problem+json` responses.
+
+### Operations and documentation
+- **Hangfire** background job that cleans up expired refresh tokens, with a protected dashboard.
+- **Swagger / OpenAPI** documentation for every endpoint.
+
+## Technologies and Services Used
+
+| Technology | What it is used for in this project |
 | --- | --- |
-| Framework | ASP.NET Core Web API, .NET 9 |
-| ORM | Entity Framework Core 9 (SQL Server) |
-| Auth | ASP.NET Core Identity, JWT Bearer |
-| CQRS / Mediator | MediatR |
-| Validation | FluentValidation |
-| Mapping | AutoMapper |
-| Background jobs | Hangfire (SQL Server storage) |
-| API docs | Swashbuckle (Swagger UI) |
+| **ASP.NET Core Web API (.NET 9)** | The web framework. Hosts the controllers, middleware and dependency injection. |
+| **Entity Framework Core 9** | ORM for data access. Handles mappings, migrations, global query filters (soft delete) and the two `DbContext`s. |
+| **SQL Server** | The database. Stores domain data, Identity data and Hangfire jobs. |
+| **ASP.NET Core Identity** | User and role management: password hashing, users, roles and refresh token storage. |
+| **JWT Bearer authentication** | Issues and validates access tokens so protected endpoints know who the caller is. |
+| **MediatR** | Implements CQRS. Controllers send commands and queries, and MediatR routes them to the right handlers. |
+| **FluentValidation** | Validates every command and query before its handler runs (through a MediatR pipeline behavior). |
+| **AutoMapper** | Maps between entities and DTOs. |
+| **Hangfire** (SQL Server storage) | Runs the recurring background job for refresh token cleanup and provides the dashboard. |
+| **Swashbuckle (Swagger UI)** | Generates the interactive API documentation. |
+
+### Custom services built in the project
+- **JWT token service** (Infrastructure): creates access tokens and refresh tokens.
+- **Repositories and Unit of Work** (Infrastructure): abstract data access behind interfaces defined in the Application layer.
+- **Authorization handlers** (Application): enforce the "owner or Admin" rule on projects, tasks and comments.
+- **Pipeline behaviors** (Application): logging and validation.
+- **`ExceptionHandlingMiddleware`** (API): central error handling.
+- **Refresh token cleanup job** (Infrastructure): the Hangfire recurring job.
 
 ## Architecture
 
-The solution follows **Clean Architecture**. Dependencies point inward: the `Domain` layer knows nothing about the outside world.
+The solution follows **Clean Architecture**. Dependencies point inward, so the `Domain` layer knows nothing about the outside world.
 
 ```mermaid
 flowchart LR
@@ -68,93 +98,22 @@ flowchart LR
 | Layer | Responsibility |
 | --- | --- |
 | **Domain** | Entities (`Project`, `Task`, `Comment`), enums, domain rules (status transitions, soft delete) and domain exceptions. No external dependencies. |
-| **Application** | Use cases as MediatR commands/queries, handlers, validators, DTOs, repository and service contracts, pipeline behaviors, authorization handlers, `Result` type. |
-| **Infrastructure** | EF Core `DbContext`s, configurations and migrations, repository and Unit of Work implementations, Identity, JWT token service, Hangfire jobs. |
-| **API** | Controllers, middleware, DI composition, Swagger and startup configuration. |
+| **Application** | Use cases as MediatR commands and queries, handlers, validators, DTOs, repository and service contracts, pipeline behaviors, authorization handlers and the `Result` type. |
+| **Infrastructure** | EF Core `DbContext`s, configurations and migrations, repository and Unit of Work implementations, Identity, the JWT token service and Hangfire jobs. |
+| **API** | Controllers, middleware, dependency injection composition, Swagger and startup configuration. |
 
-Two databases are used: one for the domain data (`AppDbContext`) and one for Identity and Hangfire (`IdentityAppDbContext`).
-
-## Getting Started
-
-### Prerequisites
-
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- SQL Server (LocalDB, Express, Developer edition, or Docker)
-- The EF Core CLI tool:
-
-  ```bash
-  dotnet tool install --global dotnet-ef
-  ```
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/TaskManagement.git
-cd TaskManagement
-```
-
-### 2. Configure the application
-
-`appsettings.Development.json` is git-ignored, so create `API/appsettings.Development.json` yourself. See [Configuration](#configuration) for the full template.
-
-### 3. Apply the database migrations
-
-Run both commands from the solution root:
-
-```bash
-dotnet ef database update --project Infrastructure --startup-project API --context AppDbContext
-dotnet ef database update --project Infrastructure --startup-project API --context IdentityAppDbContext
-```
-
-### 4. Run the API
-
-```bash
-dotnet run --project API
-```
-
-The API starts at `http://localhost:5280` (or `https://localhost:7066` with the `https` profile) and opens **Swagger UI** at `/swagger`.
-
-On startup the app seeds the `Admin` and `User` roles automatically.
-
-## Configuration
-
-Create `API/appsettings.Development.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=TaskManagementSystem;Trusted_Connection=true;TrustServerCertificate=true",
-    "IdentityConnection": "Server=.;Database=IdentityTaskManagementSystem;Trusted_Connection=true;TrustServerCertificate=true"
-  },
-  "JWT": {
-    "SecretKey": "REPLACE_WITH_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS",
-    "Issuer": "http://localhost:5280",
-    "Audience": "http://localhost:5280/api",
-    "ExpirationMinutes": "30"
-  }
-}
-```
-
-| Key | Description |
-| --- | --- |
-| `ConnectionStrings:DefaultConnection` | Database for projects, tasks and comments. |
-| `ConnectionStrings:IdentityConnection` | Database for users, roles, refresh tokens and Hangfire. |
-| `JWT:SecretKey` | Signing key. **Must be at least 32 characters** or token creation fails. |
-| `JWT:Issuer` / `JWT:Audience` | Validated on every request. |
-| `JWT:ExpirationMinutes` | Access token lifetime. |
-
-> **Security:** never commit real secrets. For local development prefer [.NET user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) (`dotnet user-secrets set "JWT:SecretKey" "..." --project API`), and use environment variables or a secret manager in production.
+**Two databases** are used: one for the domain data (`AppDbContext`) and one for Identity and Hangfire (`IdentityAppDbContext`).
 
 ## API Overview
 
-All routes are prefixed with `/api`. Protected endpoints require the header `Authorization: Bearer <access_token>`. Full request and response schemas are available in Swagger UI.
+All routes are prefixed with `/api`. Protected endpoints require the header `Authorization: Bearer <access_token>`.
 
 ### Authentication
 
 | Method | Endpoint | Description | Auth |
 | --- | --- | --- | --- |
 | `POST` | `/api/Authentication/Register` | Create an account (assigned the `User` role). | Public |
-| `POST` | `/api/Authentication/Login` | Log in and receive an access token + refresh token. | Public |
+| `POST` | `/api/Authentication/Login` | Log in and receive an access token and a refresh token. | Public |
 | `POST` | `/api/Authentication/refresh` | Exchange a refresh token for a new token pair. | Public |
 | `POST` | `/api/Authentication/logout` | Revoke a refresh token. | Refresh token in body |
 
@@ -184,33 +143,8 @@ All routes are prefixed with `/api`. Protected endpoints require the header `Aut
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | `POST` | `/api/Comments` | Add a comment to an open task. |
-| `GET` | `/api/Comments/task/{taskId}` | List comments of a task. |
+| `GET` | `/api/Comments/task/{taskId}` | List the comments of a task. |
 | `DELETE` | `/api/Comments/{id}` | Soft-delete a comment (owner or Admin). |
-
-### Example: register and create a project
-
-```http
-POST /api/Authentication/Register
-Content-Type: application/json
-
-{
-  "userName": "jane",
-  "email": "jane@example.com",
-  "password": "Str0ngPass!"
-}
-```
-
-```http
-POST /api/Projects
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-{
-  "name": "Website Redesign",
-  "description": "Redesign the marketing website",
-  "status": "Planning"
-}
-```
 
 ## Business Rules
 
@@ -233,6 +167,7 @@ stateDiagram-v2
 - Deleting is **soft**: records are flagged (`IsDeleted`, `DeletedAt`) and hidden by global query filters. Deleting a project cascades to its tasks and their comments.
 - Only the **creator** of a project, task or comment (or an **Admin**) can modify or delete it.
 - New accounts get the `User` role. The `Admin` role is not assignable through the API and must be granted directly in the Identity database.
+- The `Admin` and `User` roles are seeded automatically on startup.
 
 ## Error Handling
 
@@ -251,7 +186,7 @@ Expected failures flow through the `Result` type in the application layer and ar
 
 ## Background Jobs
 
-[Hangfire](https://www.hangfire.io/) runs a **daily recurring job** (`cleanup-expired-refresh-tokens`) that deletes expired and inactive refresh tokens.
+[Hangfire](https://www.hangfire.io/) runs a **daily recurring job** (`cleanup-expired-refresh-tokens`) that deletes expired and inactive refresh tokens, so the token table doesn't grow forever.
 
 The dashboard is available at `/hangfire`:
 
