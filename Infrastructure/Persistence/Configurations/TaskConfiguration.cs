@@ -29,6 +29,10 @@ public class TaskConfiguration : IEntityTypeConfiguration<DomainTask>
         builder.Property(t => t.DueDate)
             .IsRequired();
 
+        // Users live in the Identity database, so there is no foreign key here (same as CreatedByUserId).
+        builder.Property(t => t.AssigneeId)
+            .HasMaxLength(450);
+
         builder.Property(t => t.IsDeleted)
             .IsRequired()
             .HasDefaultValue(false);

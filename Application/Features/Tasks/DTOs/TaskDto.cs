@@ -8,4 +8,5 @@ public sealed record TaskDto(
     int ProjectId,
     string Status,
     DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    string? AssigneeId);

@@ -1,5 +1,6 @@
 using Application.Common.Identity;
 using Application.Common.ResultPattern;
+using Application.Features.Tasks.Commands.Assign;
 using Application.Features.Tasks.Commands.Create;
 using Application.Features.Tasks.Commands.Delete;
 using Application.Features.Tasks.Commands.Update;
@@ -28,6 +29,7 @@ public class TasksController(ISender sender , IUserService currentUser) : ApiBas
         var id = result.Value;
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
@@ -90,5 +92,18 @@ public class TasksController(ISender sender , IUserService currentUser) : ApiBas
             return ToProblem(result.Errors);
 
         return Ok(new { status = result.Value });
+    }
+
+    [HttpPatch("{id:int}/assignee")]
+    public async Task<IActionResult> Assign(
+        int id,
+        [FromBody] AssignTaskDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new AssignTaskCommand(id, dto.UserId), cancellationToken);
+        if (!result.IsSuccess)
+            return ToProblem(result.Errors);
+
+        return NoContent();
     }
 }

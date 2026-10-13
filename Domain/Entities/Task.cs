@@ -24,7 +24,17 @@ public class Task : BaseEntity<int> , IHasOwner
     public ICollection<Comment> Comments { get; init; } = [];
     
     // Connect users to tasks 
-    public string CreatedByUserId { get; set; } = string.Empty;
+    public string CreatedByUserId { get; init; } = string.Empty;
+
+    // The user this task is assigned to (null = unassigned)
+    public string? AssigneeId { get; private set; }
+
+    public void AssignTo(string userId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
+        AssigneeId = userId;
+    }
     
     // 
     private static readonly Dictionary<TaskStatus, TaskStatus[]> StatusTransitions = new()
